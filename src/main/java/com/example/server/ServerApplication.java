@@ -6,8 +6,9 @@ import java.net.Socket;
 public class ServerApplication {
 	public static void main(String[] args) throws Exception {
 		ServerSocket serverSocket = new ServerSocket(8080);
-		Socket socket = serverSocket.accept();
-		socket.close();
-		serverSocket.close();
+		while(true) {
+			Socket socket = serverSocket.accept();
+			socket.close();
+		}
 	}
 }
