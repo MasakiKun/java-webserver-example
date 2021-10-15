@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 public class ServerApplication {
 	public static void main(String[] args) throws Exception {
@@ -15,9 +18,23 @@ public class ServerApplication {
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 			String httpData = "NODATA";
 			int lineCnt = 0;
+			String method = "", host = "", protocol = "";
+			Map<String, String> requestHeaders = new HashMap<>();
 			while(!"".equals(httpData)) {
-				httpData = bufferedReader.readLine();
 				lineCnt++;
+				httpData = bufferedReader.readLine();
+				if(lineCnt == 1) {
+					StringTokenizer token = new StringTokenizer(httpData, " ");
+					method = token.nextToken();
+					host = token.nextToken();
+					protocol = token.nextToken();
+				} else {
+					if(!httpData.equals("")) {
+						String key = httpData.substring(0, httpData.indexOf(':'));
+						String value = httpData.substring(httpData.indexOf(':') + 1, httpData.length()).trim();
+						requestHeaders.put(key, value);
+					}
+				}
 				System.out.println(lineCnt + ": " + httpData);
 			}
 			StringBuilder stringBuilder = new StringBuilder();
