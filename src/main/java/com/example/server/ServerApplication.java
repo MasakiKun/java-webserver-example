@@ -43,6 +43,9 @@ public class ServerApplication {
 						}
 						System.out.println("this request has query strings...");
 						System.out.println(queryStrings);
+						host = host.substring(0, host.indexOf('?'));
+						System.out.println("requested host replacement because has query string...");
+						System.out.println("host: " + host);
 					}
 				} else {
 					if(!httpData.equals("")) {
