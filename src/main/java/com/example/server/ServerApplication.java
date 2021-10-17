@@ -3,6 +3,8 @@ package com.example.server;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class ServerApplication {
 			String httpData = "NODATA";
 			int lineCnt = 0;
 			String method = "", host = "", protocol = "";
+			Map<String, String> queryStrings = new HashMap<>();
 			Map<String, String> requestHeaders = new HashMap<>();
 			while(!"".equals(httpData)) {
 				lineCnt++;
@@ -28,6 +31,19 @@ public class ServerApplication {
 					method = token.nextToken();
 					host = token.nextToken();
 					protocol = token.nextToken();
+
+					if(host.indexOf('?') > -1) {
+						String queryString = host.substring(host.indexOf('?') + 1);
+						StringTokenizer queryStringToken = new StringTokenizer(queryString, "&");
+						while(queryStringToken.hasMoreTokens()) {
+							String key = queryStringToken.nextToken();
+							String value = queryStringToken.nextToken();
+							value = URLDecoder.decode(value);
+							queryStrings.put(key, value);
+						}
+						System.out.println("this request has query strings...");
+						System.out.println(queryStrings);
+					}
 				} else {
 					if(!httpData.equals("")) {
 						String key = httpData.substring(0, httpData.indexOf(':'));
