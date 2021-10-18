@@ -84,6 +84,15 @@ public class ServerApplication {
 					}
 					break;
 
+				case "/getBirthdayZodiac":
+					switch(method) {
+						case "GET":
+							String year = queryStrings.getOrDefault("year", null);
+							String month = queryStrings.getOrDefault("month", null);
+							String day = queryStrings.getOrDefault("day", null);
+							// TODO: year, month, day가 없을 경우 bad request 처리...
+					}
+
 				default:
 					httpRespCode = 404;
 			}
