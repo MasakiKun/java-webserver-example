@@ -47,6 +47,9 @@ public class ServerApplication {
 						System.out.println("requested host replacement because has query string...");
 						System.out.println("host: " + host);
 					}
+					if("/".equals(host)) {
+						host = "/index.html";
+					}
 				} else {
 					if(!httpData.equals("")) {
 						String key = httpData.substring(0, httpData.indexOf(':'));
