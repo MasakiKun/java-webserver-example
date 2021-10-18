@@ -97,6 +97,7 @@ public class ServerApplication {
 				case 404:
 					dataOutputStream.writeBytes("HTTP/1.0 404 Not Found\r\n");
 					stringBuilder.append("<h1>404 Not Found</h1>");
+					break;
 
 				case 405:
 					dataOutputStream.writeBytes("HTTP/1.0 405 Not Allowed\r\n");
