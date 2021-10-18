@@ -59,24 +59,54 @@ public class ServerApplication {
 				}
 				System.out.println(lineCnt + ": " + httpData);
 			}
+			int httpRespCode = -1;
+			String contentType = "";
 			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.append("<html>\r\n");
-			stringBuilder.append("<head>\r\n");
-			stringBuilder.append("\t<title>SimpleWebserver</title>\r\n");
-			stringBuilder.append("</head>\r\n");
-			stringBuilder.append("<body>\r\n");
-			stringBuilder.append("\t<h1>OK</h1>\r\n");
-			stringBuilder.append("</body>\r\n");
-			stringBuilder.append("</html>\r\n");
-			byte[] httpRespBodyBytes = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
+			switch(host) {
+				case "/index.html":
+					switch(method) {
+						case "GET":
+							httpRespCode = 200;
+							contentType = "text/html";
+							stringBuilder.append("<html>\r\n");
+							stringBuilder.append("<head>\r\n");
+							stringBuilder.append("\t<title>SimpleWebserver</title>\r\n");
+							stringBuilder.append("</head>\r\n");
+							stringBuilder.append("<body>\r\n");
+							stringBuilder.append("\t<h1>OK</h1>\r\n");
+							stringBuilder.append("</body>\r\n");
+							stringBuilder.append("</html>\r\n");
+							break;
+
+						case "POST":
+						default:
+							httpRespCode = 405;
+					}
+			}
 			OutputStream outputStream = socket.getOutputStream();
 			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-			dataOutputStream.writeBytes("HTTP/1.0 200 OK\r\n");
-			dataOutputStream.writeBytes("Content-Type: text/html\r\n");
+			switch(httpRespCode) {
+				case 200:
+					dataOutputStream.writeBytes("HTTP/1.0 200 OK\r\n");
+					break;
+
+				case 405:
+					dataOutputStream.writeBytes("HTTP/1.0 405 Not Allowed\r\n");
+					stringBuilder.append("<h1>405 Not Allowed</h1>");
+					break;
+
+				default:
+					dataOutputStream.writeBytes("HTTP/1.0 501 Not Implemented\r\n");
+					stringBuilder.append("<h1>501 Not Implemented</h1>");
+			}
+			byte[] httpRespBodyBytes = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
+			dataOutputStream.writeBytes("Content-Type: " + contentType + "\r\n");
 			dataOutputStream.writeBytes("Server: SimpleJavaWebServer\r\n");
 			dataOutputStream.writeBytes("Content-Length: " + httpRespBodyBytes.length + "\r\n");
 			dataOutputStream.writeBytes("\r\n");
-			dataOutputStream.write(httpRespBodyBytes, 0, httpRespBodyBytes.length);
+			if(httpRespBodyBytes.length > 0) {
+				dataOutputStream.write(httpRespBodyBytes, 0, httpRespBodyBytes.length);
+			}
 			dataOutputStream.writeBytes("\r\n");
 			dataOutputStream.flush();
 			dataOutputStream.close();
