@@ -82,6 +82,10 @@ public class ServerApplication {
 						default:
 							httpRespCode = 405;
 					}
+					break;
+
+				default:
+					httpRespCode = 404;
 			}
 			OutputStream outputStream = socket.getOutputStream();
 			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -89,6 +93,10 @@ public class ServerApplication {
 				case 200:
 					dataOutputStream.writeBytes("HTTP/1.0 200 OK\r\n");
 					break;
+
+				case 404:
+					dataOutputStream.writeBytes("HTTP/1.0 404 Not Found\r\n");
+					stringBuilder.append("<h1>404 Not Found</h1>");
 
 				case 405:
 					dataOutputStream.writeBytes("HTTP/1.0 405 Not Allowed\r\n");
