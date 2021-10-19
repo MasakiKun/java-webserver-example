@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -87,10 +88,121 @@ public class ServerApplication {
 				case "/getBirthdayZodiac":
 					switch(method) {
 						case "GET":
-							String year = queryStrings.getOrDefault("year", null);
-							String month = queryStrings.getOrDefault("month", null);
-							String day = queryStrings.getOrDefault("day", null);
-							// TODO: year, month, day가 없을 경우 bad request 처리...
+							String year = queryStrings.getOrDefault("year", "");
+							String month = queryStrings.getOrDefault("month", "");
+							String day = queryStrings.getOrDefault("day", "");
+							if(
+								("".equals(year) || year == null) &&
+								("".equals(month) || month == null) &&
+								("".equals(day) || day == null)
+							) {
+								httpRespCode = 400;
+								break;
+							}
+
+							int nYear, nMonth, nDay;
+							try {
+								nYear = Integer.valueOf(year);
+								nMonth = Integer.valueOf(month);
+								nDay = Integer.valueOf(day);
+							} catch(NumberFormatException nfe) {
+								httpRespCode = 400;
+								break;
+							}
+
+							contentType = "application/json";
+
+
+							LocalDate birthday = LocalDate.of(nYear, nMonth, nDay);
+							LocalDate startDate, endDate;
+
+							// Aries (3.21 ~ 4.19)
+							startDate = LocalDate.of(nYear, 3, 21);
+							endDate = LocalDate.of(nYear, 4, 19);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Aries,");
+								stringBuilder.append("		korean: 양자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// Taurus (4.20 ~ 5.20)
+							startDate = LocalDate.of(nYear, 4, 20);
+							endDate = LocalDate.of(nYear, 5, 20);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Taurus,");
+								stringBuilder.append("		korean: 황소자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// Cancer (5.21
+							// Leo (7.2. ~ 8.22)
+							startDate = LocalDate.of(nYear, 7, 23);
+							endDate = LocalDate.of(nYear, 8, 22);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Leo,");
+								stringBuilder.append("		korean: 사자자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// Virgo (8.23 ~ 9.23)
+							startDate = LocalDate.of(nYear, 8, 23);
+							endDate = LocalDate.of(nYear, 9, 23);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Leo,");
+								stringBuilder.append("		korean: 사자자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// Libra (9.24 ~ 10.22)
+							startDate = LocalDate.of(nYear, 9, 22);
+							endDate = LocalDate.of(nYear, 10, 22);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Virgo,");
+								stringBuilder.append("		korean: 처녀자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// Scorpius (10.23 ~ 11.22)
+							startDate = LocalDate.of(nYear, 10, 23);
+							endDate = LocalDate.of(nYear, 11, 22);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Scorpius,");
+								stringBuilder.append("		korean: 전갈자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+
+							// Sagittarius (10.23 ~ 11.22)
+							startDate = LocalDate.of(nYear, 10, 23);
+							endDate = LocalDate.of(nYear, 11, 22);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	zodiac: {");
+								stringBuilder.append("		name: Sagittarius,");
+								stringBuilder.append("		korean: 전갈자리");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+								break;
+							}
+							// TODO: 나머지도 인터넷에서 별자리 생년월일 표 찾아서 하나하나 넣어놓고 테스트를 해볼것
 					}
 
 				default:
@@ -101,6 +213,11 @@ public class ServerApplication {
 			switch(httpRespCode) {
 				case 200:
 					dataOutputStream.writeBytes("HTTP/1.0 200 OK\r\n");
+					break;
+
+				case 400:
+					dataOutputStream.writeBytes("HTTP/1.0 503 Bad Request\r\n");
+					stringBuilder.append("<h1>503 Bad Request</h1>");
 					break;
 
 				case 404:
