@@ -281,6 +281,104 @@ public class ServerApplication {
 					}
 					break;
 
+				case "/getBirthFlower":
+					switch(method) {
+						case "GET":
+							String month = queryStrings.getOrDefault("month", "");
+							if("".equals(month) || month == null) {
+								httpRespCode = 400;
+								break;
+							}
+							int birthMonth = -1;
+							try {
+								birthMonth = Integer.valueOf(month);
+								if(birthMonth < 1 || birthMonth > 12) {
+									httpRespCode = 503;
+									break;
+								}
+							} catch(NumberFormatException nfe) {
+								httpRespCode = 503;
+								break;
+							}
+							stringBuilder.append("{");
+							stringBuilder.append("	\"flower\": {");
+							if(birthMonth == 1) {
+								stringBuilder.append("	\"name\": \"수선화\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"사랑\", \"매력\", \"어머니의 날\", \"스승의 날\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 2) {
+								stringBuilder.append("	\"name\": \"제비꽃\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"신의\", \"지혜와 희망\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 3) {
+								stringBuilder.append("	\"name\": \"수선화\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"봄\", \"부활\", \"가정의 행복\", \"존경\", \"존중\", \"우정\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 4) {
+								stringBuilder.append("	\"name\": \"스위트 피\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"사랑\", \"젊음\", \"순결\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 5) {
+								stringBuilder.append("	\"name\": \"은방울 꽃\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"사랑\", \"감사\", \"열정\", \"아름다음\", \"완벽함\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 6) {
+								stringBuilder.append("	\"name\": \"나리꽃\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"사랑\", \"감사\", \"고마움\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 7) {
+								stringBuilder.append("	\"name\": \"제비고깔\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"우직함\", \"자연적인 아름다움\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 8) {
+								stringBuilder.append("	\"name\": \"글라디올러스\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"의지의 힘\", \"도덕적 고결함\", \"명예\", \"기억\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 9) {
+								stringBuilder.append("	\"name\": \"물망초\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"인내\", \"기억\", \"정신적인 사랑\", \"애정\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 10) {
+								stringBuilder.append("	\"name\": \"금잔화\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"맹렬함\", \"우아함\", \"헌신\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 11) {
+								stringBuilder.append("	\"name\": \"국화\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"연민\", \"우정\", \"기쁨\"");
+								stringBuilder.append("	]");
+							} else if(birthMonth == 12) {
+								stringBuilder.append("	\"name\": \"포인세티아\",");
+								stringBuilder.append("	\"meaning\": [");
+								stringBuilder.append("		\"용기\", \"성공\", \"당신은 특별한 존재\"");
+								stringBuilder.append("	]");
+							}
+							stringBuilder.append("}}");
+							contentType = "application/json";
+							httpRespCode = 200;
+							break;
+
+						case "OPTIONS":
+							httpRespCode = 200;
+							additionalResponseHeader.put("Access-Control-Allow-Origin", "*");
+							break;
+
+						default:
+							httpRespCode = 405;
+
+					}
+					break;
+
 				default:
 					httpRespCode = 404;
 			}
