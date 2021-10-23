@@ -122,6 +122,8 @@ public class ServerApplication {
 							contentType = "application/json";
 							LocalDate birthday = LocalDate.of(nYear, nMonth, nDay);
 							LocalDate startDate, endDate;
+							LocalDate startOfYear = LocalDate.of(nYear, 1, 1);
+							LocalDate endOfYear = LocalDate.of(nYear, 12, 31);
 
 							// Aries (3.21 ~ 4.19)
 							startDate = LocalDate.of(nYear, 3, 21);
@@ -225,7 +227,10 @@ public class ServerApplication {
 							// Capricornus (12.25 ~ 1.19)
 							startDate = LocalDate.of(nYear, 12, 25);
 							endDate = LocalDate.of(nYear + 1, 1, 19);
-							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+							if(
+									(birthday.isAfter(startDate) && birthday.isBefore(endOfYear)) ||
+									((birthday.isEqual(startOfYear) || birthday.isAfter(startOfYear)) && birthday.isBefore(endDate))
+							) {
 								stringBuilder.append("{");
 								stringBuilder.append("	\"zodiac\": {");
 								stringBuilder.append("		\"name\": \"Capricornus\",");
@@ -234,8 +239,8 @@ public class ServerApplication {
 								stringBuilder.append("}");
 							}
 							// Aquarius (1.20 ~ 2.18)
-							startDate = LocalDate.of(nYear + 1, 1, 20);
-							endDate = LocalDate.of(nYear + 1, 2, 18);
+							startDate = LocalDate.of(nYear, 1, 20);
+							endDate = LocalDate.of(nYear, 2, 18);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
 								stringBuilder.append("	\"zodiac\": {");
@@ -245,8 +250,8 @@ public class ServerApplication {
 								stringBuilder.append("}");
 							}
 							// Pisces (2.19 ~ 3.20)
-							startDate = LocalDate.of(nYear + 1, 2, 19);
-							endDate = LocalDate.of(nYear + 1, 3, 20);
+							startDate = LocalDate.of(nYear, 2, 19);
+							endDate = LocalDate.of(nYear, 3, 20);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
 								stringBuilder.append("	\"zodiac\": {");
