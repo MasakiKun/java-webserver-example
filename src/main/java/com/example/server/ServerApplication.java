@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 public class ServerApplication {
@@ -72,6 +73,7 @@ public class ServerApplication {
 			}
 			int httpRespCode = -1;
 			String contentType = "";
+			Map<String, String> additionalResponseHeader = new HashMap<>();
 			StringBuilder stringBuilder = new StringBuilder();
 			switch(host) {
 				case "/index.html":
@@ -95,7 +97,7 @@ public class ServerApplication {
 					}
 					break;
 
-				case "/getBirthdayZodiac":
+				case "/getBirthZodiac":
 					switch(method) {
 						case "GET":
 							String year = queryStrings.getOrDefault("year", "");
@@ -264,8 +266,14 @@ public class ServerApplication {
 							if(stringBuilder.length() == 0) {
 								httpRespCode = 500;
 							} else {
+								additionalResponseHeader.put("Access-Control-Allow-Origin", "*");
 								httpRespCode = 200;
 							}
+							break;
+
+						case "OPTIONS":
+							httpRespCode = 200;
+							additionalResponseHeader.put("Access-Control-Allow-Origin", "*");
 							break;
 
 						default:
@@ -316,6 +324,12 @@ public class ServerApplication {
 			dataOutputStream.writeBytes("Content-Type: " + contentType + "\r\n");
 			dataOutputStream.writeBytes("Server: SimpleJavaWebServer\r\n");
 			dataOutputStream.writeBytes("Content-Length: " + httpRespBodyBytes.length + "\r\n");
+			if(!additionalResponseHeader.isEmpty()) {
+				Set<String> headerKeys = additionalResponseHeader.keySet();
+				for(String key : headerKeys) {
+					dataOutputStream.writeBytes(key + ": " + additionalResponseHeader.get(key) + "\r\n");
+				}
+			}
 			dataOutputStream.writeBytes("\r\n");
 			if(httpRespBodyBytes.length > 0) {
 				dataOutputStream.write(httpRespBodyBytes, 0, httpRespBodyBytes.length);
