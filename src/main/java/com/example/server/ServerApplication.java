@@ -25,8 +25,13 @@ public class ServerApplication {
 			Map<String, String> queryStrings = new HashMap<>();
 			Map<String, String> requestHeaders = new HashMap<>();
 			while(!"".equals(httpData)) {
-				lineCnt++;
 				httpData = bufferedReader.readLine();
+				if(httpData == null) {
+					System.out.println("null");
+					// continue;
+					break;
+				}
+				lineCnt++;
 				if(lineCnt == 1) {
 					StringTokenizer token = new StringTokenizer(httpData, " ");
 					method = token.nextToken();
@@ -37,8 +42,9 @@ public class ServerApplication {
 						String queryString = host.substring(host.indexOf('?') + 1);
 						StringTokenizer queryStringToken = new StringTokenizer(queryString, "&");
 						while(queryStringToken.hasMoreTokens()) {
-							String key = queryStringToken.nextToken();
-							String value = queryStringToken.nextToken();
+							String qsToken = queryStringToken.nextToken();
+							String key = qsToken.substring(0, qsToken.indexOf('='));
+							String value = qsToken.substring(qsToken.indexOf('=') + 1);
 							value = URLDecoder.decode(value);
 							queryStrings.put(key, value);
 						}
@@ -54,11 +60,15 @@ public class ServerApplication {
 				} else {
 					if(!httpData.equals("")) {
 						String key = httpData.substring(0, httpData.indexOf(':'));
-						String value = httpData.substring(httpData.indexOf(':') + 1, httpData.length()).trim();
+						String value = httpData.substring(httpData.indexOf(':') + 1).trim();
 						requestHeaders.put(key, value);
 					}
 				}
 				System.out.println(lineCnt + ": " + httpData);
+			}
+			if(httpData == null) {
+				socket.close();
+				continue;
 			}
 			int httpRespCode = -1;
 			String contentType = "";
@@ -92,8 +102,8 @@ public class ServerApplication {
 							String month = queryStrings.getOrDefault("month", "");
 							String day = queryStrings.getOrDefault("day", "");
 							if(
-								("".equals(year) || year == null) &&
-								("".equals(month) || month == null) &&
+								("".equals(year) || year == null) ||
+								("".equals(month) || month == null) ||
 								("".equals(day) || day == null)
 							) {
 								httpRespCode = 400;
@@ -109,10 +119,7 @@ public class ServerApplication {
 								httpRespCode = 400;
 								break;
 							}
-
 							contentType = "application/json";
-
-
 							LocalDate birthday = LocalDate.of(nYear, nMonth, nDay);
 							LocalDate startDate, endDate;
 
@@ -121,89 +128,145 @@ public class ServerApplication {
 							endDate = LocalDate.of(nYear, 4, 19);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Aries,");
-								stringBuilder.append("		korean: 양자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Aries\",");
+								stringBuilder.append("		\"korean\": \"양자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
 							// Taurus (4.20 ~ 5.20)
 							startDate = LocalDate.of(nYear, 4, 20);
 							endDate = LocalDate.of(nYear, 5, 20);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Taurus,");
-								stringBuilder.append("		korean: 황소자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Taurus\",");
+								stringBuilder.append("		\"korean: \"황소자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
-							// Cancer (5.21
-							// Leo (7.2. ~ 8.22)
+							// Cancer (5.21 ~ 7.22)
+							startDate = LocalDate.of(nYear, 5, 21);
+							endDate = LocalDate.of(nYear, 7, 22);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Cancer\",");
+								stringBuilder.append("		\"korean\": \"게자리\"");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+							}
+							// Leo (7.23 ~ 8.22)
 							startDate = LocalDate.of(nYear, 7, 23);
 							endDate = LocalDate.of(nYear, 8, 22);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Leo,");
-								stringBuilder.append("		korean: 사자자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Leo\",");
+								stringBuilder.append("		\"korean\": \"사자자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
 							// Virgo (8.23 ~ 9.23)
 							startDate = LocalDate.of(nYear, 8, 23);
 							endDate = LocalDate.of(nYear, 9, 23);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Leo,");
-								stringBuilder.append("		korean: 사자자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Leo\",");
+								stringBuilder.append("		\"korean\": \"사자자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
 							// Libra (9.24 ~ 10.22)
 							startDate = LocalDate.of(nYear, 9, 22);
 							endDate = LocalDate.of(nYear, 10, 22);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Virgo,");
-								stringBuilder.append("		korean: 처녀자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Virgo\",");
+								stringBuilder.append("		\"korean\": \"처녀자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
 							// Scorpius (10.23 ~ 11.22)
 							startDate = LocalDate.of(nYear, 10, 23);
 							endDate = LocalDate.of(nYear, 11, 22);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Scorpius,");
-								stringBuilder.append("		korean: 전갈자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Scorpius\",");
+								stringBuilder.append("		\"korean\": \"전갈자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
-
 							// Sagittarius (10.23 ~ 11.22)
 							startDate = LocalDate.of(nYear, 10, 23);
 							endDate = LocalDate.of(nYear, 11, 22);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
-								stringBuilder.append("	zodiac: {");
-								stringBuilder.append("		name: Sagittarius,");
-								stringBuilder.append("		korean: 전갈자리");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Sagittarius\",");
+								stringBuilder.append("		\"korean\": \"전갈자리\"");
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
-								break;
 							}
-							// TODO: 나머지도 인터넷에서 별자리 생년월일 표 찾아서 하나하나 넣어놓고 테스트를 해볼것
+							// Sagittarius (11.23 ~ 12.24)
+							startDate = LocalDate.of(nYear, 11, 23);
+							endDate = LocalDate.of(nYear, 12, 24);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Sagittarius\",");
+								stringBuilder.append("		\"korean\": \"궁수자리\"");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+							}
+							// Capricornus (12.25 ~ 1.19)
+							startDate = LocalDate.of(nYear, 12, 25);
+							endDate = LocalDate.of(nYear + 1, 1, 19);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Capricornus\",");
+								stringBuilder.append("		\"korean\": \"염소자리\"");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+							}
+							// Aquarius (1.20 ~ 2.18)
+							startDate = LocalDate.of(nYear + 1, 1, 20);
+							endDate = LocalDate.of(nYear + 1, 2, 18);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Aquarius\",");
+								stringBuilder.append("		\"korean\": \"물병자리\"");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+							}
+							// Pisces (2.19 ~ 3.20)
+							startDate = LocalDate.of(nYear + 1, 2, 19);
+							endDate = LocalDate.of(nYear + 1, 3, 20);
+							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
+								stringBuilder.append("{");
+								stringBuilder.append("	\"zodiac\": {");
+								stringBuilder.append("		\"name\": \"Capricornus\",");
+								stringBuilder.append("		\"korean\": \"물고기자리\"");
+								stringBuilder.append("	}");
+								stringBuilder.append("}");
+							}
+
+							if(stringBuilder.length() == 0) {
+								httpRespCode = 500;
+							} else {
+								httpRespCode = 200;
+							}
+							break;
+
+						default:
+							httpRespCode = 405;
 					}
+					break;
 
 				default:
 					httpRespCode = 404;
@@ -217,21 +280,31 @@ public class ServerApplication {
 
 				case 400:
 					dataOutputStream.writeBytes("HTTP/1.0 503 Bad Request\r\n");
+					stringBuilder.delete(0, stringBuilder.length());
 					stringBuilder.append("<h1>503 Bad Request</h1>");
 					break;
 
 				case 404:
 					dataOutputStream.writeBytes("HTTP/1.0 404 Not Found\r\n");
+					stringBuilder.delete(0, stringBuilder.length());
 					stringBuilder.append("<h1>404 Not Found</h1>");
 					break;
 
 				case 405:
 					dataOutputStream.writeBytes("HTTP/1.0 405 Not Allowed\r\n");
+					stringBuilder.delete(0, stringBuilder.length());
 					stringBuilder.append("<h1>405 Not Allowed</h1>");
+					break;
+
+				case 500:
+					dataOutputStream.writeBytes("HTTP/1.0 500 Internal Server Error\r\n");
+					stringBuilder.delete(0, stringBuilder.length());
+					stringBuilder.append("<h1>500 Internal Server Error");
 					break;
 
 				default:
 					dataOutputStream.writeBytes("HTTP/1.0 501 Not Implemented\r\n");
+					stringBuilder.delete(0, stringBuilder.length());
 					stringBuilder.append("<h1>501 Not Implemented</h1>");
 			}
 			byte[] httpRespBodyBytes = stringBuilder.toString().getBytes(StandardCharsets.UTF_8);
