@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 public class ServerApplication {
-	public static void main(String[] args) throws Exception {
+	public void serverStart() throws Exception {
 		ServerSocket serverSocket = new ServerSocket(8080);
 		System.out.println("Server listen in port 8080...");
 		while(true) {
@@ -158,9 +158,9 @@ public class ServerApplication {
 							String month = queryStrings.getOrDefault("month", "");
 							String day = queryStrings.getOrDefault("day", "");
 							if(
-								("".equals(year) || year == null) ||
-								("".equals(month) || month == null) ||
-								("".equals(day) || day == null)
+									("".equals(year) || year == null) ||
+											("".equals(month) || month == null) ||
+											("".equals(day) || day == null)
 							) {
 								httpRespCode = 400;
 								break;
@@ -274,7 +274,7 @@ public class ServerApplication {
 							LocalDate boundaryEndDate = LocalDate.of(nYear, 1, 19);
 							if(
 									(birthday.isAfter(startDate) && birthday.isBefore(endDate)) ||
-									(birthday.isAfter(boundaryStartDate) && birthday.isBefore(boundaryEndDate))
+											(birthday.isAfter(boundaryStartDate) && birthday.isBefore(boundaryEndDate))
 							) {
 								stringBuilder.append("{");
 								stringBuilder.append("	\"zodiac\": {");
@@ -489,5 +489,12 @@ public class ServerApplication {
 			inputStream.close();
 			socket.close();
 		}
+	}
+
+	public static void main(String[] args) throws Exception {
+		ServerApplication serverApplication = new ServerApplication();
+		serverApplication.serverStart();
+
+		System.exit(1);
 	}
 }
