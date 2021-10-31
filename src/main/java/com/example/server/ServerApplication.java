@@ -7,10 +7,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class ServerApplication {
 	public void serverStart() throws Exception {
@@ -19,55 +16,9 @@ public class ServerApplication {
 		while(true) {
 			Socket socket = serverSocket.accept();
 			InputStream inputStream = socket.getInputStream();
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-			String httpData = "NODATA";
-			int lineCnt = 0;
-			String method = "", host = "", protocol = "";
-			Map<String, String> queryStrings = new HashMap<>();
-			Map<String, String> requestHeaders = new HashMap<>();
-			while(!"".equals(httpData)) {
-				httpData = bufferedReader.readLine();
-				if(httpData == null) {
-					System.out.println("null");
-					// continue;
-					break;
-				}
-				lineCnt++;
-				if(lineCnt == 1) {
-					StringTokenizer token = new StringTokenizer(httpData, " ");
-					method = token.nextToken();
-					host = token.nextToken();
-					protocol = token.nextToken();
-
-					if(host.indexOf('?') > -1) {
-						String queryString = host.substring(host.indexOf('?') + 1);
-						StringTokenizer queryStringToken = new StringTokenizer(queryString, "&");
-						while(queryStringToken.hasMoreTokens()) {
-							String qsToken = queryStringToken.nextToken();
-							String key = qsToken.substring(0, qsToken.indexOf('='));
-							String value = qsToken.substring(qsToken.indexOf('=') + 1);
-							value = URLDecoder.decode(value);
-							queryStrings.put(key, value);
-						}
-						System.out.println("this request has query strings...");
-						System.out.println(queryStrings);
-						host = host.substring(0, host.indexOf('?'));
-						System.out.println("requested host replacement because has query string...");
-						System.out.println("host: " + host);
-					}
-					if("/".equals(host)) {
-						host = "/index.html";
-					}
-				} else {
-					if(!httpData.equals("")) {
-						String key = httpData.substring(0, httpData.indexOf(':'));
-						String value = httpData.substring(httpData.indexOf(':') + 1).trim();
-						requestHeaders.put(key, value);
-					}
-				}
-				System.out.println(lineCnt + ": " + httpData);
-			}
-			if(httpData == null) {
+			HttpRequest httpRequest = httpRequestParse(inputStream);
+			socket.shutdownInput();
+			if(httpRequest == null) {
 				socket.close();
 				continue;
 			}
@@ -75,9 +26,9 @@ public class ServerApplication {
 			String contentType = "";
 			Map<String, String> additionalResponseHeader = new HashMap<>();
 			StringBuilder stringBuilder = new StringBuilder();
-			switch(host) {
+			switch(httpRequest.getHost()) {
 				case "/index.html":
-					switch(method) {
+					switch(httpRequest.getMethod()) {
 						case "GET":
 							httpRespCode = 200;
 							contentType = "text/html";
@@ -152,11 +103,11 @@ public class ServerApplication {
 					break;
 
 				case "/getBirthZodiac":
-					switch(method) {
+					switch(httpRequest.getMethod()) {
 						case "GET":
-							String year = queryStrings.getOrDefault("year", "");
-							String month = queryStrings.getOrDefault("month", "");
-							String day = queryStrings.getOrDefault("day", "");
+							String year = httpRequest.getQueryStrings().getOrDefault("year", "");
+							String month = httpRequest.getQueryStrings().getOrDefault("month", "");
+							String day = httpRequest.getQueryStrings().getOrDefault("day", "");
 							if(
 									("".equals(year) || year == null) ||
 											("".equals(month) || month == null) ||
@@ -325,9 +276,9 @@ public class ServerApplication {
 					break;
 
 				case "/getBirthFlower":
-					switch(method) {
+					switch(httpRequest.getMethod()) {
 						case "GET":
-							String month = queryStrings.getOrDefault("month", "");
+							String month = httpRequest.getQueryStrings().getOrDefault("month", "");
 							if("".equals(month) || month == null) {
 								httpRespCode = 400;
 								break;
@@ -485,10 +436,66 @@ public class ServerApplication {
 			dataOutputStream.flush();
 			dataOutputStream.close();
 			outputStream.close();
-			bufferedReader.close();
-			inputStream.close();
 			socket.close();
 		}
+	}
+
+	private HttpRequest httpRequestParse(InputStream httpReqInputStream) throws Exception {
+		HttpRequest req = null;
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpReqInputStream));
+		String httpData = "NODATA";
+		int lineCnt = 0;
+		String method = "", host = "", protocol = "";
+		Map<String, String> queryStrings = new HashMap<>();
+		Map<String, String> requestHeaders = new HashMap<>();
+		while(!"".equals(httpData)) {
+			httpData = bufferedReader.readLine();
+			if(httpData == null) {
+				System.out.println("null");
+				// continue;
+				break;
+			}
+			lineCnt++;
+			if(lineCnt == 1) {
+				StringTokenizer token = new StringTokenizer(httpData, " ");
+				method = token.nextToken();
+				host = token.nextToken();
+				protocol = token.nextToken();
+
+				if(host.indexOf('?') > -1) {
+					String queryString = host.substring(host.indexOf('?') + 1);
+					StringTokenizer queryStringToken = new StringTokenizer(queryString, "&");
+					while(queryStringToken.hasMoreTokens()) {
+						String qsToken = queryStringToken.nextToken();
+						String key = qsToken.substring(0, qsToken.indexOf('='));
+						String value = qsToken.substring(qsToken.indexOf('=') + 1);
+						value = URLDecoder.decode(value);
+						queryStrings.put(key, value);
+					}
+					System.out.println("this request has query strings...");
+					System.out.println(queryStrings);
+					host = host.substring(0, host.indexOf('?'));
+					System.out.println("requested host replacement because has query string...");
+					System.out.println("host: " + host);
+				}
+				if("/".equals(host)) {
+					host = "/index.html";
+				}
+			} else {
+				if(!httpData.equals("")) {
+					String key = httpData.substring(0, httpData.indexOf(':'));
+					String value = httpData.substring(httpData.indexOf(':') + 1).trim();
+					requestHeaders.put(key, value);
+				}
+			}
+			System.out.println(lineCnt + ": " + httpData);
+		}
+
+		if(httpData != null) {
+			req = new HttpRequest(method, host, protocol, queryStrings, requestHeaders);
+		}
+
+		return req;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -496,5 +503,33 @@ public class ServerApplication {
 		serverApplication.serverStart();
 
 		System.exit(1);
+	}
+}
+
+class HttpRequest {
+	private String method;
+	private String host;
+	private String protocol;
+	private Map<String, String> queryStrings = new HashMap<>();
+	private Map<String, String> headers = new HashMap<>();
+
+	public String getMethod() { return this.method; }
+	public String getHost() { return this.host; }
+	public String getProtocol() { return this.protocol; }
+	public Map<String, String> getQueryStrings() {
+		return Collections.unmodifiableMap(this.queryStrings);
+	}
+	public Map<String, String> getHeaders() {
+		return Collections.unmodifiableMap(this.headers);
+	}
+
+	public HttpRequest(
+			String method, String host, String protocol,
+			Map<String, String> queryStrings, Map<String, String> headers) {
+		this.method = method;
+		this.host = host;
+		this.protocol = protocol;
+		if(queryStrings != null) this.queryStrings = new HashMap<>(queryStrings);
+		if(queryStrings != null) this.headers = new HashMap<>(headers);
 	}
 }
