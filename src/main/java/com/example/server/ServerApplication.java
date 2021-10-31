@@ -81,14 +81,68 @@ public class ServerApplication {
 						case "GET":
 							httpRespCode = 200;
 							contentType = "text/html";
-							stringBuilder.append("<html>\r\n");
-							stringBuilder.append("<head>\r\n");
-							stringBuilder.append("\t<title>SimpleWebserver</title>\r\n");
-							stringBuilder.append("</head>\r\n");
-							stringBuilder.append("<body>\r\n");
-							stringBuilder.append("\t<h1>OK</h1>\r\n");
-							stringBuilder.append("</body>\r\n");
-							stringBuilder.append("</html>\r\n");
+							stringBuilder.append("<!DOCTYPE html>\n" +
+									"<head>\n" +
+									"\t<title>생일 정보 조회</title>\n" +
+									"\t<meta charset=\"utf-8\" />\n" +
+									"</head>\n" +
+									"<body>\n" +
+									"\t<h1>생일 정보 얻기</h1>\n" +
+									"\t<h2>생일 입력</h2>\n" +
+									"\t<dl>\n" +
+									"\t\t<dt>탄생 년도</dt>\n" +
+									"\t\t<dd><input type=\"text\" id=\"txtBirthYear\" /></dd>\n" +
+									"\t\t<dt>탄생월</dt>\n" +
+									"\t\t<dd><input type=\"text\" id=\"txtBirthMonth\" /></dd>\n" +
+									"\t\t<dt>탄생일</dt>\n" +
+									"\t\t<dd><input type=\"text\" id=\"txtBirthDay\" /></dd>\n" +
+									"\t</dl>\n" +
+									"\t<p><button id=\"btnGetBirthData\">확인하기</button></p>\n" +
+									"\t<span id=\"lblResult\"></span>\n" +
+									"</body>\n" +
+									"<script type=\"text/javascript\">\n" +
+									"\tdocument.getElementById(\"btnGetBirthData\").addEventListener(\"click\", function() {\n" +
+									"\t\tconst year = document.getElementById(\"txtBirthYear\").value;\n" +
+									"\t\tconst month = document.getElementById(\"txtBirthMonth\").value;\n" +
+									"\t\tconst day = document.getElementById(\"txtBirthDay\").value;\n" +
+									"\t\tconst zodiacReqUrl = `http://localhost:8080/getBirthZodiac?year=${year}&month=${month}&day=${day}`;\n" +
+									"\n" +
+									"\t\tconst zodiacReq = new XMLHttpRequest();\n" +
+									"\t\tlet zodiacData = null;\n" +
+									"\t\tzodiacReq.onreadystatechange = function() {\n" +
+									"\t\t\tif(zodiacReq.readyState === zodiacReq.DONE) {\n" +
+									"\t\t\t\tif(zodiacReq.status === 200) {\n" +
+									"\t\t\t\t\tzodiacData = JSON.parse(zodiacReq.responseText);\n" +
+									"\t\t\t\t} else {\n" +
+									"\t\t\t\t\tconsole.error(zodiac.responseText);\n" +
+									"\t\t\t\t}\n" +
+									"\n" +
+									"\t\t\t\tconst flowerReqUrl = `http://localhost:8080/getBirthFlower?month=${month}`;\n" +
+									"\n" +
+									"\t\t\t\tconst flowerReq = new XMLHttpRequest();\n" +
+									"\t\t\t\tlet flowerData = null;\n" +
+									"\t\t\t\tflowerReq.onreadystatechange = function() {\n" +
+									"\t\t\t\t\tif(flowerReq.readyState === flowerReq.DONE) {\n" +
+									"\t\t\t\t\t\tif(flowerReq.status === 200) {\n" +
+									"\t\t\t\t\t\t\tflowerData = JSON.parse(flowerReq.responseText);\n" +
+									"\n" +
+									"\t\t\t\t\t\t\tlet msg = `당신의 별자리는 ${zodiacData.zodiac.korean}(${zodiacData.zodiac.name})이며, 탄생화는 ${flowerData.flower.name}입니다.`;\n" +
+									"\t\t\t\t\t\t\tlblResult.innerHTML = msg;\n" +
+									"\t\t\t\t\t\t} else {\n" +
+									"\t\t\t\t\t\t\tconsole.error(flowerData.responseText);\n" +
+									"\t\t\t\t\t\t}\n" +
+									"\t\t\t\t\t}\n" +
+									"\t\t\t\t}\n" +
+									"\t\t\t\tflowerReq.open(\"GET\", flowerReqUrl);\n" +
+									"\t\t\t\tflowerReq.send();\n" +
+									"\t\t\t}\n" +
+									"\t\t}\n" +
+									"\n" +
+									"\t\tzodiacReq.open(\"GET\", zodiacReqUrl);\n" +
+									"\t\tzodiacReq.send();\n" +
+									"\t});\n" +
+									"</script>\n" +
+									"</html>");
 							break;
 
 						case "POST":
@@ -124,8 +178,6 @@ public class ServerApplication {
 							contentType = "application/json";
 							LocalDate birthday = LocalDate.of(nYear, nMonth, nDay);
 							LocalDate startDate, endDate;
-							LocalDate startOfYear = LocalDate.of(nYear, 1, 1);
-							LocalDate endOfYear = LocalDate.of(nYear, 12, 31);
 
 							// Aries (3.21 ~ 4.19)
 							startDate = LocalDate.of(nYear, 3, 21);
@@ -183,7 +235,7 @@ public class ServerApplication {
 								stringBuilder.append("}");
 							}
 							// Libra (9.24 ~ 10.22)
-							startDate = LocalDate.of(nYear, 9, 22);
+							startDate = LocalDate.of(nYear, 9, 24);
 							endDate = LocalDate.of(nYear, 10, 22);
 							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
 								stringBuilder.append("{");
@@ -204,17 +256,6 @@ public class ServerApplication {
 								stringBuilder.append("	}");
 								stringBuilder.append("}");
 							}
-							// Sagittarius (10.23 ~ 11.22)
-							startDate = LocalDate.of(nYear, 10, 23);
-							endDate = LocalDate.of(nYear, 11, 22);
-							if(birthday.isAfter(startDate) && birthday.isBefore(endDate)) {
-								stringBuilder.append("{");
-								stringBuilder.append("	\"zodiac\": {");
-								stringBuilder.append("		\"name\": \"Sagittarius\",");
-								stringBuilder.append("		\"korean\": \"전갈자리\"");
-								stringBuilder.append("	}");
-								stringBuilder.append("}");
-							}
 							// Sagittarius (11.23 ~ 12.24)
 							startDate = LocalDate.of(nYear, 11, 23);
 							endDate = LocalDate.of(nYear, 12, 24);
@@ -228,10 +269,12 @@ public class ServerApplication {
 							}
 							// Capricornus (12.25 ~ 1.19)
 							startDate = LocalDate.of(nYear, 12, 25);
-							endDate = LocalDate.of(nYear + 1, 1, 19);
+							endDate = LocalDate.of(nYear, 12, 31);
+							LocalDate boundaryStartDate = LocalDate.of(nYear, 1, 1);
+							LocalDate boundaryEndDate = LocalDate.of(nYear, 1, 19);
 							if(
-									(birthday.isAfter(startDate) && birthday.isBefore(endOfYear)) ||
-									((birthday.isEqual(startOfYear) || birthday.isAfter(startOfYear)) && birthday.isBefore(endDate))
+									(birthday.isAfter(startDate) && birthday.isBefore(endDate)) ||
+									(birthday.isAfter(boundaryStartDate) && birthday.isBefore(boundaryEndDate))
 							) {
 								stringBuilder.append("{");
 								stringBuilder.append("	\"zodiac\": {");
@@ -365,7 +408,13 @@ public class ServerApplication {
 							}
 							stringBuilder.append("}}");
 							contentType = "application/json";
-							httpRespCode = 200;
+
+							if(stringBuilder.length() == 0) {
+								httpRespCode = 500;
+							} else {
+								additionalResponseHeader.put("Access-Control-Allow-Origin", "*");
+								httpRespCode = 200;
+							}
 							break;
 
 						case "OPTIONS":
